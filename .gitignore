@@ -2,7 +2,6 @@
 /data/raw
 /data/interim
 /data/processed
-/data/universe
 .ipynb_checkpoints
 
 # pycache
