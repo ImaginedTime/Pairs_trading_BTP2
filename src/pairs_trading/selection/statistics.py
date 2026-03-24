@@ -114,9 +114,10 @@ def mean_crosses_per_year(series: pd.Series, freq: str = "D") -> float:
 
     mean_val = s.mean()
     above = s > mean_val
-    crosses = (above.astype(int).diff().abs() == 2).sum()
 
-    # Convert observed crossings to annual rate.
+    # A crossing happens when the boolean state changes from True to False or vice versa
+    crosses = above.astype(int).diff().abs().eq(1).sum()
+
     n = len(s)
     if freq.lower() in {"d", "1d", "day", "daily"}:
         periods_per_year = 252
