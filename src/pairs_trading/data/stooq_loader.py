@@ -25,6 +25,8 @@ def _to_stooq_symbol(symbol: str) -> str:
 
     s = str(symbol).strip().lower()
     s = s.replace(" ", "")
+    s = s.replace(".", "-")
+    s = s.replace("/", "-")
     if not s.endswith(".us"):
         s = f"{s}.us"
     return s
@@ -66,6 +68,7 @@ def fetch_stooq_ohlcv(symbol: str, interval: str, start: date, end: date) -> pd.
     params = {
         "s": stooq_symbol,
         "i": stooq_interval,
+        "apikey": "XhRWU4mEPZ2eaLnS10CispKqVlxOIgQv"
     }
 
     response = requests.get(STOOQ_BASE_URL, params=params, timeout=30)
