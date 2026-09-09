@@ -1,0 +1,401 @@
+\documentclass[aspectratio=169]{beamer}
+
+% ── Theme ────────────────────────────────────────────────────────────────────
+\usetheme{default}
+\usepackage{graphicx}
+\usecolortheme{seagull}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{frametitle}[default]
+\setbeamercolor{frametitle}{fg=black}
+\setbeamerfont{frametitle}{series=\bfseries, size=\normalsize}
+
+% Global text margin (prevents content touching slide edge)
+\setbeamersize{text margin left=7mm, text margin right=7mm}
+
+% ── Colours ──────────────────────────────────────────────────────────────────
+\definecolor{footlineblue}{RGB}{0,0,139}
+\definecolor{lightblue}{RGB}{230,240,255}
+
+% ── Block colours ────────────────────────────────────────────────────────────
+\setbeamercolor{block title}{bg=footlineblue!80, fg=white}
+\setbeamercolor{block body}{bg=lightblue, fg=black}
+\setbeamerfont{block title}{size=\small, series=\bfseries}
+\setbeamerfont{block body}{size=\small}
+
+% ── Alert block ──────────────────────────────────────────────────────────────
+\setbeamercolor{alerted text}{fg=footlineblue}
+
+% ── Footline ─────────────────────────────────────────────────────────────────
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \hbox{%
+    \begin{beamercolorbox}[wd=.40\paperwidth,ht=3.2ex,dp=1.0ex,leftskip=2mm]{footline}%
+      \color{white}\small\insertsection
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.20\paperwidth,ht=3.2ex,dp=1.0ex,center]{footline}%
+      \color{white}\small\insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.40\paperwidth,ht=3.2ex,dp=1.0ex,rightskip=2mm,right]{footline}%
+      \color{white}\small Min-Hop LEO Constellation Design
+    \end{beamercolorbox}%
+  }%
+  \vskip0pt
+}
+
+% ── Packages ─────────────────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb, graphicx, booktabs, array}
+\usepackage{hyperref}
+\hypersetup{colorlinks=false, pdfborder={0 0 0}}
+
+% ── Image placeholder ────────────────────────────────────────────────────────
+% Usage: \imgbox{height}{caption}   (width always = \linewidth of its container)
+\newcommand{\imgbox}[2]{%
+  \fbox{%
+    \parbox[c][#1][c]{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{%
+      \centering\scriptsize\color{gray}\textit{#2}%
+    }%
+  }%
+}
+
+% ── List spacing ─────────────────────────────────────────────────────────────
+\setlength{\leftmargini}{1.2em}
+
+% ── Title metadata ───────────────────────────────────────────────────────────
+\title[Min-Hop Constellation Design]{%
+  Minimum-hop Constellation Design\\[2pt]
+  for Low Earth Orbit Satellite Networks}
+\author[Karthik]{Karthik \quad {\small (22EC39017)}}
+\institute[IIT Kharagpur]{%
+  Department of Electronics and Electrical Communication\\
+  IIT Kharagpur\\[2pt]
+  {\small Supervisor: Prof.\ Rajarshi Roy}}
+\date{Spring Semester, 2025--26}
+
+\begin{document}
+
+% ════════════════════════════════════════════════════════════════════════════
+% 01 — Title
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+% 02 — Outline
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{Outline}
+  \vspace{0.5cm}
+  \small
+  \begin{enumerate}
+    \setlength\itemsep{0.55em}
+    \item Motivation
+    \item Problem Statement
+    \item System Model
+    \item Performance Metrics
+    \item Topology Families
+    \item Key Results
+    \item Conclusions \& Future Work
+  \end{enumerate}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Motivation}
+% 03 — Motivation
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{Motivation}
+  \vspace{0.1cm}
+  \begin{columns}[T, totalwidth=\textwidth]
+
+    \column{0.56\textwidth}
+    \begin{block}{Context}
+      \small
+      \begin{itemize}
+        \setlength\itemsep{0.35em}
+        \item LEO mega-constellations use \textbf{steerable optical ISL terminals}.
+        \item Link partner can be changed post-launch — topology is a \textbf{design choice}.
+        \item Each extra hop adds delay, forwarding overhead, and ISL load.
+      \end{itemize}
+    \end{block}
+
+    \vspace{0.25cm}
+
+    \begin{block}{The Gap}
+      \small
+      \begin{itemize}
+        \setlength\itemsep{0.35em}
+        \item The \textbf{mesh grid} is used universally.
+        \item It has \emph{never} been proved optimal.
+      \end{itemize}
+    \end{block}
+
+    \column{0.40\textwidth}
+    \vspace{0.1cm}
+    \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth,height=4cm]{LEO.png}
+    \caption{LEO Satellite Network and Mesh Grid.}
+    \label{fig:my_image}
+\end{figure}
+
+  \end{columns}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Problem Statement}
+% 04 — Problem Statement
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{Problem Statement}
+  \vspace{0.15cm}
+  \small
+
+  \begin{block}{Given}
+    An $n_s \times n_o$ LEO constellation; each satellite maintains exactly $\Delta$ ISL connections.
+  \end{block}
+
+  \vspace{0.2cm}
+
+  \begin{block}{Objective}
+    Find the ISL topology that \textbf{minimises Average Shortest Path Length (ASPL) and Worst Shortest Path Length (WSPL)}.
+  \end{block}
+
+  \vspace{0.2cm}
+
+  \begin{columns}[T, totalwidth=\textwidth]
+    \column{0.47\textwidth}
+    \begin{block}{Vertex-Symmetric}
+      Same connection pattern at every node.\\[5pt]
+      Simpler to manage.\\
+      Bounded by $\Theta(\sqrt{N})$ ASPL.
+    \end{block}
+
+    \column{0.47\textwidth}
+    \begin{block}{General Regular}
+      Only degree constraint imposed.\\[5pt]
+      Asymmetry exploited.\\
+      Achieves $\Theta(\log N)$ ASPL.
+    \end{block}
+  \end{columns}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{System Model}
+% 05 — System Model
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{System Model}
+  \vspace{0.1cm}
+  \begin{columns}[T, totalwidth=\textwidth]
+
+    \column{0.52\textwidth}
+    \begin{block}{Constellation as a Torus}
+      \small
+      \begin{itemize}
+        \setlength\itemsep{0.35em}
+        \item $N = n_s \times n_o$ satellites on a lattice.
+        \item Orbital wrap-around $\Rightarrow$ \textbf{unit-area torus}.
+        \item ISL topology: $\Delta$-regular undirected graph $G = (V,E)$.
+      \end{itemize}
+    \end{block}
+
+    \vspace{0.3cm}
+    \small
+    \textbf{Torus shift operator:}
+    \[
+      v \oplus e \;=\; \begin{pmatrix}
+        v[0]+e[0] \bmod n_s \\[2pt]
+        v[1]+e[1] \bmod n_o
+      \end{pmatrix}
+    \]
+
+    \column{0.43\textwidth}
+    \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{TORUS.png}
+    \caption{Torus representation of LEO Satellites.}
+    \label{fig:my_image}
+\end{figure}
+
+    \vspace{0.25cm}
+
+  \end{columns}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Topology Families}
+% 08 — Offset Topology
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{The Offset Topology}
+  \vspace{0.1cm}
+  \begin{columns}[T, totalwidth=\textwidth]
+
+    \column{0.52\textwidth}
+    \begin{block}{One Change to the Mesh Grid}
+      \small
+      Replace cross-link $[0,1]^\top$ with $[\varepsilon,1]^\top$:
+      \[
+        \varepsilon \;=\; \left\lfloor \sqrt{\tfrac{2n_s}{n_o}} - 1 \right\rceil
+      \]
+      \begin{itemize}
+        \setlength\itemsep{0.3em}
+        \item Intra-orbital links kept intact.
+        \item Cross-link distance $\propto 1/\!\sqrt{n_s}$ — \textbf{shortens as density grows}.
+      \end{itemize}
+    \end{block}
+
+    \vspace{0.2cm}
+
+    \begin{alertblock}{\small No Hardware Changes Required}
+      \small Only the ISL terminal \textbf{pointing angle} changes.
+    \end{alertblock}
+
+    \column{0.43\textwidth}
+    \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{offsettorus.png}
+    \caption{Torus with Offset.}
+    \label{fig:my_image}
+\end{figure}
+
+    \vspace{0.2cm}
+  \end{columns}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+% 09 — General Regular Topologies
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{General Regular Topologies}
+  \vspace{0.1cm}
+  \begin{columns}[T, totalwidth=\textwidth]
+
+    % First Column: SA
+    \column{0.48\textwidth}
+    \begin{block}{Simulated Annealing (SA)}
+      \small
+      \begin{itemize}
+        \setlength\itemsep{0.3em}
+        \item \textbf{Init:} Steger--Wormald random regular graph.
+        \item \textbf{Procedure:}
+        \begin{enumerate}
+            \item Propose a random double-edge swap.
+            \item Evaluate the change in Average Shortest Path Length (ASPL).
+            \item Accept swap if ASPL improves, or with probability $e^{-\Delta/T}$ if it worsens.
+            \item Decrease temperature $T$ and repeat until convergence.
+        \end{enumerate}
+        \item \textbf{Result:} Achieves ASPL within \textbf{1.01--1.05$\times$} lower bound.
+      \end{itemize}
+    \end{block}
+
+    % Second Column: PRGS
+    \column{0.48\textwidth}
+    \begin{block}{PRGS Algorithm}
+      \small
+      \begin{itemize}
+        \setlength\itemsep{0.3em}
+        \item \textbf{Init:} Torus space with constrained link range ($r \leq 0.25$).
+        \item \textbf{Procedure:}
+        \begin{enumerate}
+            \item Partition the torus space into localized cells.
+            \item Distribute vertices across these cells.
+            \item Randomly generate intra-cell edges within the local groups.
+            \item Form inter-cell edges while strictly maintaining the $r \leq 0.25$ range constraint.
+        \end{enumerate}
+        \item \textbf{Result:} Provably achieves $O(\log N)$ ASPL.
+      \end{itemize}
+    \end{block}
+
+  \end{columns}
+\end{frame}
+% ════════════════════════════════════════════════════════════════════════════
+\section{Results}
+% 10 — Degree-4 Results
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{Results — Degree-4 Symmetric ($n_o = 4$)}
+  \vspace{0.1cm}
+  \begin{columns}[T, totalwidth=\textwidth]
+
+    \column{0.50\textwidth}
+    \begin{block}{ASPL and WSPL Comparison}
+      \footnotesize
+      \renewcommand{\arraystretch}{1.25}
+      \begin{tabular}{@{}rr rr rr@{}}
+        \toprule
+        $n_s$ & $N$
+              & \multicolumn{2}{c}{Mesh Grid}
+              & \multicolumn{2}{c}{Sqrt-Offset} \\
+        \cmidrule(lr){3-4}\cmidrule(lr){5-6}
+              &     & ASPL & WSPL & ASPL & WSPL \\
+        \midrule
+        40  & 160 & 11.1 & 32 & 6.2  & 10 \\
+        80  & 320 & 21.1 & 62 & 8.9  & 14 \\
+        120 & 480 & 31.1 & 92 & 10.9 & 19 \\
+        \bottomrule
+      \end{tabular}
+    \end{block}
+
+    \vspace{0.2cm}
+
+    \column{0.45\textwidth}
+    \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth,height=4cm]{ASPL.png}
+    \caption{ASPL Comparision}
+    \label{fig:my_image}
+\end{figure}
+
+  \end{columns}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+% 11 — WSPL Analysis
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}{WSPL Analysis — A Novel Perspective}
+  \vspace{0.1cm}
+  \begin{columns}[T, totalwidth=\textwidth]
+
+    \column{0.50\textwidth}
+    \begin{block}{Summary Across All Families}
+      \footnotesize
+      \renewcommand{\arraystretch}{1.25}
+      \begin{tabular}{@{}lrrr@{}}
+        \toprule
+        Topology & ASPL & WSPL & Ratio \\
+        \midrule
+        Mesh grid            & 31.1 & 92 & 13.6$\times$ \\
+        Sqrt-offset          & 10.9 & 19 &  4.8$\times$ \\
+        SA-refined           &  3.6 &  7 &  1.05$\times$ \\
+        SA (dist.\ $r{=}0.25$) & 3.9 & 9 & 1.11$\times$ \\
+        PRGS                 &  5.5 & 10 &  1.67$\times$ \\
+        \bottomrule
+      \end{tabular}
+    \end{block}
+
+    \vspace{0.2cm}
+
+    \begin{block}{Key Insight}
+      \small WSPL improvement is \textbf{systematically larger} than the ASPL improvement across all topology families.
+    \end{block}
+
+    \column{0.45\textwidth}
+   \begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth, height=4cm]{WSPL_no.png}
+    \caption{WSPL Comparision}
+    \label{fig:my_image}
+\end{figure}
+
+  \end{columns}
+\end{frame}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Conclusion}
+% 12 — Thank You
+% ════════════════════════════════════════════════════════════════════════════
+\begin{frame}
+  \vfill
+  \centering
+  \Huge \textbf{Thank You!}
+  \vfill
+\end{frame}
+
+\end{document}
